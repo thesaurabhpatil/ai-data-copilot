@@ -57,7 +57,7 @@ if user_input:
     with st.chat_message("user"):
         st.markdown(user_input)
 
-    # 🔥 RAG logic
+    #  RAG logic
     docs = db.similarity_search(user_input, k=3)
     context = "\n".join([doc.page_content[:300] for doc in docs])
 
