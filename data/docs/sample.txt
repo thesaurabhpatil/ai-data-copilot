@@ -1,0 +1,7 @@
+The sales pipeline loads daily revenue data into the warehouse.
+
+Revenue is calculated as the total transaction amount per day.
+
+The ETL process runs every night at 2 AM.
+
+Data is stored in a centralized data warehouse.
