@@ -1,6 +1,7 @@
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.docstore.document import Document
+from config import EMBEDDING_MODEL
 
 def load_vector_db():
     docs = [
@@ -10,9 +11,7 @@ def load_vector_db():
     ]
 
     embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+        model_name=EMBEDDING_MODEL
     )
 
-    vector_db = FAISS.from_documents(docs, embeddings)
-
-    return vector_db
+    return FAISS.from_documents(docs, embeddings)
