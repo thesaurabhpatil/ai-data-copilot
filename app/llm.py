@@ -1,5 +1,8 @@
-from langchain_community.llms import Ollama
-from config import MODEL_NAME
+from langchain_community.llms import HuggingFaceHub
+import os
 
 def load_llm():
-    return Ollama(model=MODEL_NAME)
+    return HuggingFaceHub(
+        repo_id="google/flan-t5-base",
+        model_kwargs={"temperature": 0.5}
+    )
