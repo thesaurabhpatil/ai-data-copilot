@@ -1,18 +1,12 @@
-def generate_response(query, db, llm, top_k=2, max_chars=150):
-    # Step 1: Retrieve
-    docs = db.similarity_search(query, k=top_k)
+def generate_response(query, db, llm):
+    docs = db.similarity_search(query, k=2)
 
-    # Step 2: Build context safely
-    context = " ".join([
-        doc.page_content[:max_chars] for doc in docs
-    ])
+    context = " ".join([doc.page_content[:200] for doc in docs])
 
-    # Step 3: Prompt
     prompt = f"""
     Context: {context}
     Question: {query}
     Answer:
     """
 
-    # Step 4: Generate response
     return llm.stream(prompt)
