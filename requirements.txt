@@ -6,3 +6,4 @@ sentence-transformers
 faiss-cpu>=1.13.0
 pypdf
 huggingface_hub
+python>=3.10,<3.12
