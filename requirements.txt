@@ -2,6 +2,7 @@ gradio
 langchain
 langchain-community
 langchain-huggingface
+langchain-core
 langchain-text-splitters
 sentence-transformers
 faiss-cpu>=1.13.0

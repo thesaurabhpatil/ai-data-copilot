@@ -1,7 +1,6 @@
 from pypdf import PdfReader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain.docstore.document import Document
-
+from langchain_core.documents import Document
 
 def load_pdf(file):
     reader = PdfReader(file)
