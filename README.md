@@ -1,3 +1,13 @@
+---
+title: AI Data Copilot
+emoji: 🤖
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: 4.31.0
+app_file: app.py
+pinned: false
+---
 # ⚡ AI Data Copilot (RAG + Local LLM)
 
 A **production-ready GenAI application** that allows you to chat with your data using **Retrieval-Augmented Generation (RAG)**.
