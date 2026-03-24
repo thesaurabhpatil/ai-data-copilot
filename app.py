@@ -27,6 +27,9 @@ init_default_db()
 def chat(user_input, history):
     global pdf_db, default_db
 
+    if not user_input:
+        return history, history
+
     try:
         if history is None:
             history = []
@@ -42,22 +45,30 @@ def chat(user_input, history):
         return history, history
 
     except Exception as e:
-        return history, history + [(user_input, f"❌ Error: {str(e)}")]
+        history.append((user_input, f"❌ Error: {str(e)}"))
+        return history, history
+    
 # ---------------- PDF UPLOAD ---------------- #
 def upload_pdf(file):
     global pdf_db
 
+    if file is None:
+        return "❌ Please upload a file first"
+
     try:
-        text = load_pdf(file)   # ✅ FIXED (no .name)
+        text = load_pdf(file)
+
+        if not text.strip():
+            return "❌ Could not extract text from PDF"
 
         docs = split_text(text)
         pdf_db = create_vector_db(docs)
 
-        return "✅ PDF uploaded successfully!"
-    
+        return "✅ PDF processed successfully!"
+
     except Exception as e:
         return f"❌ Error: {str(e)}"
-
+    
 # ---------------- UI ---------------- #
 with gr.Blocks() as demo:
     gr.Markdown("# ⚡ AI Data Copilot")
