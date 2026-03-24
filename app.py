@@ -34,13 +34,13 @@ def chat_fn(message, history):
 
         response = generate_response(message, active_db, llm)
 
-        if not response:
+        if not response or response.strip() == "":
             return "⚠️ No response generated"
 
         return response
 
     except Exception as e:
-        return f"❌ Error: {str(e)}"
+        return f"❌ Chat Error: {str(e)}"
     
 # ---------------- PDF UPLOAD ---------------- #
 def upload_pdf(file):
