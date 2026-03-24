@@ -4,6 +4,7 @@ from app.llm import load_llm
 from app.service import generate_response
 from app.pdf_utils import load_pdf, split_text
 
+gr.close_all()
 # Load default system
 llm = load_llm()
 
@@ -37,13 +38,15 @@ def chat(user_input, history):
         for chunk in generate_response(user_input, active_db, llm):
             response += chunk
 
-        history.append((user_input, response))
+        # ALWAYS ensure tuple format
+        history = history + [(user_input, response)]
 
         return history, history
 
     except Exception as e:
-        history.append((user_input, f"❌ Error: {str(e)}"))
+        history = history + [(user_input, f"❌ Error: {str(e)}")]
         return history, history
+    
 # ---------------- PDF UPLOAD ---------------- #
 def upload_pdf(file):
     global pdf_db
@@ -81,7 +84,9 @@ with gr.Blocks() as demo:
             clear = gr.Button("Clear Chat")
 
     upload_btn.click(upload_pdf, inputs=pdf_input, outputs=status)
-    msg.submit(chat, inputs=[msg, chatbot], outputs=[chatbot, chatbot])
-    clear.click(lambda: None, None, chatbot, queue=False)
+    msg.submit(chat, inputs=[msg, chatbot], outputs=[chatbot, chatbot]).then(
+    lambda: "", None, msg
+)
+    clear.click(lambda: [], None, chatbot, queue=False)
 
 demo.launch()
