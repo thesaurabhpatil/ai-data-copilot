@@ -25,27 +25,20 @@ def init_default_db():
 init_default_db()
 
 # ---------------- CHAT FUNCTION ---------------- #
-def chat(user_input, history):
+def chat_fn(message, history):
     global pdf_db, default_db
-
-    if history is None:
-        history = []
 
     try:
         active_db = pdf_db if pdf_db else default_db
 
         response = ""
-        for chunk in generate_response(user_input, active_db, llm):
+        for chunk in generate_response(message, active_db, llm):
             response += chunk
 
-        # ALWAYS ensure tuple format
-        history = history + [(user_input, response)]
-
-        return history, history
+        return response
 
     except Exception as e:
-        history = history + [(user_input, f"❌ Error: {str(e)}")]
-        return history, history
+        return f"❌ Error: {str(e)}"
     
 # ---------------- PDF UPLOAD ---------------- #
 def upload_pdf(file):
@@ -69,6 +62,8 @@ def upload_pdf(file):
         return f"❌ Error: {str(e)}"
     
 # ---------------- UI ---------------- #
+import gradio as gr
+
 with gr.Blocks() as demo:
     gr.Markdown("# ⚡ AI Data Copilot")
 
@@ -76,17 +71,14 @@ with gr.Blocks() as demo:
         with gr.Column(scale=1):
             pdf_input = gr.File(label="Upload PDF")
             upload_btn = gr.Button("Process PDF")
-            status = gr.Textbox(label="Status", interactive=False)
+            status = gr.Textbox(label="Status")
 
         with gr.Column(scale=3):
-            chatbot = gr.Chatbot()
-            msg = gr.Textbox(placeholder="Ask something...")
-            clear = gr.Button("Clear Chat")
+            chat_ui = gr.ChatInterface(
+                fn=chat_fn,
+                title="💬 Chat with your data"
+            )
 
     upload_btn.click(upload_pdf, inputs=pdf_input, outputs=status)
-    msg.submit(chat, inputs=[msg, chatbot], outputs=[chatbot, chatbot]).then(
-    lambda: "", None, msg
-)
-    clear.click(lambda: [], None, chatbot, queue=False)
 
 demo.launch()
