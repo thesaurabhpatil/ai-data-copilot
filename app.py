@@ -25,19 +25,15 @@ def init_default_db():
 init_default_db()
 
 # ---------------- CHAT FUNCTION ---------------- #
-import gradio as gr
-
 def chat_fn(message, history):
     global pdf_db, default_db
 
     try:
         active_db = pdf_db if pdf_db else default_db
 
-        response = ""
-        for chunk in generate_response(message, active_db, llm):
-            response += chunk
+        response = generate_response(message, active_db, llm)
 
-        return response  # ✅ ONLY STRING
+        return response
 
     except Exception as e:
         return f"❌ Error: {str(e)}"

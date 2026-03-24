@@ -9,4 +9,6 @@ def generate_response(query, db, llm):
     Answer:
     """
 
-    return llm.stream(prompt)
+    response = llm.invoke(prompt)
+
+    return response
