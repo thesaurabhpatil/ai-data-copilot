@@ -11,4 +11,8 @@ def generate_response(query, db, llm):
 
     response = llm.invoke(prompt)
 
-    return response
+    # 🔥 CRITICAL FIX
+    if hasattr(response, "content"):
+        return response.content   # LangChain AIMessage
+    else:
+        return str(response)      # fallback

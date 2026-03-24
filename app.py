@@ -33,6 +33,9 @@ def chat_fn(message, history):
 
         response = generate_response(message, active_db, llm)
 
+        if not response:
+            return "⚠️ No response generated"
+
         return response
 
     except Exception as e:
