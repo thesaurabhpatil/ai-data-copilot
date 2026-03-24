@@ -27,26 +27,37 @@ init_default_db()
 def chat(user_input, history):
     global pdf_db, default_db
 
-    if not user_input:
-        return history, history
+    if history is None:
+        history = []
 
     try:
-        if history is None:
-            history = []
-
         active_db = pdf_db if pdf_db else default_db
 
+        # Add user message
+        history.append({
+            "role": "user",
+            "content": user_input
+        })
+
+        # Generate response
         response = ""
         for chunk in generate_response(user_input, active_db, llm):
             response += chunk
 
-        history.append((user_input, response))
+        # Add assistant message
+        history.append({
+            "role": "assistant",
+            "content": response
+        })
 
-        return history, history
+        return history
 
     except Exception as e:
-        history.append((user_input, f"❌ Error: {str(e)}"))
-        return history, history
+        history.append({
+            "role": "assistant",
+            "content": f"❌ Error: {str(e)}"
+        })
+        return history
     
 # ---------------- PDF UPLOAD ---------------- #
 def upload_pdf(file):
@@ -80,12 +91,12 @@ with gr.Blocks() as demo:
             status = gr.Textbox(label="Status", interactive=False)
 
         with gr.Column(scale=3):
-            chatbot = gr.Chatbot()
+            chatbot = gr.Chatbot(type="messages")
             msg = gr.Textbox(placeholder="Ask something...")
             clear = gr.Button("Clear Chat")
 
     upload_btn.click(upload_pdf, inputs=pdf_input, outputs=status)
-    msg.submit(chat, inputs=[msg, chatbot], outputs=[chatbot, chatbot])
+    msg.submit(chat, inputs=[msg, chatbot], outputs=chatbot)
     clear.click(lambda: None, None, chatbot, queue=False)
 
 demo.launch()
