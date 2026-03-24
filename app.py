@@ -25,6 +25,8 @@ def init_default_db():
 init_default_db()
 
 # ---------------- CHAT FUNCTION ---------------- #
+import gradio as gr
+
 def chat_fn(message, history):
     global pdf_db, default_db
 
@@ -35,7 +37,7 @@ def chat_fn(message, history):
         for chunk in generate_response(message, active_db, llm):
             response += chunk
 
-        return response
+        return response  # ✅ ONLY STRING
 
     except Exception as e:
         return f"❌ Error: {str(e)}"
@@ -62,8 +64,6 @@ def upload_pdf(file):
         return f"❌ Error: {str(e)}"
     
 # ---------------- UI ---------------- #
-import gradio as gr
-
 with gr.Blocks() as demo:
     gr.Markdown("# ⚡ AI Data Copilot")
 
@@ -75,8 +75,7 @@ with gr.Blocks() as demo:
 
         with gr.Column(scale=3):
             chat_ui = gr.ChatInterface(
-                fn=chat_fn,
-                title="💬 Chat with your data"
+                fn=chat_fn
             )
 
     upload_btn.click(upload_pdf, inputs=pdf_input, outputs=status)
