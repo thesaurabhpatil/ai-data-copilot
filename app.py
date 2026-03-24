@@ -3,7 +3,8 @@ from app.rag import create_vector_db
 from app.llm import load_llm
 from app.service import generate_response
 from app.pdf_utils import load_pdf, split_text
-
+import warnings
+warnings.filterwarnings("ignore")
 gr.close_all()
 # Load default system
 llm = load_llm()
