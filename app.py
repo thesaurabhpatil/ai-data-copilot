@@ -27,31 +27,36 @@ init_default_db()
 def chat(user_input, history):
     global pdf_db, default_db
 
-    if history is None:
-        history = []
+    try:
+        if history is None:
+            history = []
 
-    # Choose DB
-    active_db = pdf_db if pdf_db else default_db
+        active_db = pdf_db if pdf_db else default_db
 
-    # Generate response
-    response = ""
-    for chunk in generate_response(user_input, active_db, llm):
-        response += chunk
+        response = ""
+        for chunk in generate_response(user_input, active_db, llm):
+            response += chunk
 
-    history.append((user_input, response))
+        history.append((user_input, response))
 
-    return history, history
+        return history, history
 
+    except Exception as e:
+        return history, history + [(user_input, f"❌ Error: {str(e)}")]
 # ---------------- PDF UPLOAD ---------------- #
 def upload_pdf(file):
     global pdf_db
 
-    text = load_pdf(file.name)
-    docs = split_text(text)
+    try:
+        text = load_pdf(file)   # ✅ FIXED (no .name)
 
-    pdf_db = create_vector_db(docs)
+        docs = split_text(text)
+        pdf_db = create_vector_db(docs)
 
-    return "✅ PDF uploaded! You can now ask questions."
+        return "✅ PDF uploaded successfully!"
+    
+    except Exception as e:
+        return f"❌ Error: {str(e)}"
 
 # ---------------- UI ---------------- #
 with gr.Blocks() as demo:
@@ -61,7 +66,7 @@ with gr.Blocks() as demo:
         with gr.Column(scale=1):
             pdf_input = gr.File(label="Upload PDF")
             upload_btn = gr.Button("Process PDF")
-            status = gr.Textbox(label="Status")
+            status = gr.Textbox(label="Status", interactive=False)
 
         with gr.Column(scale=3):
             chatbot = gr.Chatbot()
