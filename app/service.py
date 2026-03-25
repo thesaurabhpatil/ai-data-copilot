@@ -5,28 +5,25 @@ def generate_response(query, db, llm):
         context = " ".join([doc.page_content[:200] for doc in docs])
 
         prompt = f"""
-        Answer the question using the context below.
+        Context: {context}
 
-        Context:
-        {context}
+        Question: {query}
 
-        Question:
-        {query}
-
-        Answer:
+        Give a short and clear answer:
         """
 
         response = llm.invoke(prompt)
 
-        # Handle response types
-        if isinstance(response, str):
-            return response
-
         if hasattr(response, "content"):
-            return response.content
+            response = response.content
+        else:
+            response = str(response)
 
-        return str(response)
-
-    except Exception as e:
-        import traceback
-        return f"❌ LLM Error:\n{traceback.format_exc()}"
+# 🔥 CLEAN OUTPUT
+            response = response.replace(prompt, "").strip()
+    
+            return response
+    
+        #except Exception as e:
+        #    import traceback
+        #    return f"❌ LLM Error:\n{traceback.format_exc()}"
