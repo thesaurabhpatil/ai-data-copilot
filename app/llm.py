@@ -3,9 +3,10 @@ from transformers import pipeline
 
 def load_llm():
     pipe = pipeline(
-        "text-generation",                     
-        model="distilgpt2",                    
-        max_new_tokens=200,
+        "text-generation",
+        model="TinyLlama/TinyLlama-1.1B-Chat-v1.0", 
+        max_new_tokens=256,
+        temperature=0.3,
     )
 
     return HuggingFacePipeline(pipeline=pipe)

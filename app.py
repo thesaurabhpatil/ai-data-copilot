@@ -1,31 +1,40 @@
 import gradio as gr
-from app.rag import create_vector_db
+from app.rag import load_vector_db
 from app.llm import load_llm
 from app.service import generate_response
 from app.pdf_utils import load_pdf, split_text
-import warnings
-warnings.filterwarnings("ignore")
-gr.close_all()
-# Load default system
+
+# -------------------------------
+# GLOBAL STATE
+# -------------------------------
+pdf_db = None
+default_db = load_vector_db()
 llm = load_llm()
 
-# Global DBs
-default_db = None
-pdf_db = None
+# -------------------------------
+# PDF PROCESSING
+# -------------------------------
+def upload_pdf(file):
+    global pdf_db
 
-# ---------------- INIT DEFAULT DB ---------------- #
-def init_default_db():
-    global default_db
+    if file is None:
+        return "❌ Please upload a PDF"
 
-    docs = split_text(
-        "AI is transforming the world. Python is widely used in data engineering. Machine learning is part of AI."
-    )
+    try:
+        text = load_pdf(file.name)
+        chunks = split_text(text)
 
-    default_db = create_vector_db(docs)
+        pdf_db = load_vector_db(chunks)
 
-init_default_db()
+        return "✅ PDF processed successfully!"
 
-# ---------------- CHAT FUNCTION ---------------- #
+    except Exception as e:
+        return f"❌ Error processing PDF: {str(e)}"
+
+
+# -------------------------------
+# CHAT FUNCTION (RAG)
+# -------------------------------
 def chat_fn(message, history):
     global pdf_db, default_db
 
@@ -41,44 +50,49 @@ def chat_fn(message, history):
 
     except Exception as e:
         import traceback
-        return f"❌ Chat Error:\n{traceback.format_exc()}"
-    
-# ---------------- PDF UPLOAD ---------------- #
-def upload_pdf(file):
-    global pdf_db
+        return f"❌ Error:\n{traceback.format_exc()}"
 
-    if file is None:
-        return "❌ Please upload a file first"
 
-    try:
-        text = load_pdf(file)
+# -------------------------------
+# UI
+# -------------------------------
+with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
-        if not text.strip():
-            return "❌ Could not extract text from PDF"
-
-        docs = split_text(text)
-        pdf_db = create_vector_db(docs)
-
-        return "✅ PDF processed successfully!"
-
-    except Exception as e:
-        return f"❌ Error: {str(e)}"
-    
-# ---------------- UI ---------------- #
-with gr.Blocks() as demo:
     gr.Markdown("# ⚡ AI Data Copilot")
+    gr.Markdown("Chat with your data using RAG (PDF + AI)")
 
     with gr.Row():
-        with gr.Column(scale=1):
-            pdf_input = gr.File(label="Upload PDF")
-            upload_btn = gr.Button("Process PDF")
-            status = gr.Textbox(label="Status")
 
-        with gr.Column(scale=3):
-            chat_ui = gr.ChatInterface(
-                fn=chat_fn
+        # LEFT PANEL (PDF Upload)
+        with gr.Column(scale=1):
+            gr.Markdown("### 📄 Upload Document")
+
+            pdf_input = gr.File(label="Upload PDF")
+            upload_btn = gr.Button("Process PDF", variant="primary")
+            status = gr.Textbox(label="Status", interactive=False)
+
+            upload_btn.click(
+                upload_pdf,
+                inputs=pdf_input,
+                outputs=status
             )
 
-    upload_btn.click(upload_pdf, inputs=pdf_input, outputs=status)
+        # RIGHT PANEL (CHAT)
+        with gr.Column(scale=3):
 
-demo.launch()
+            chat_ui = gr.ChatInterface(
+                fn=chat_fn,
+                title="💬 Chat with your data",
+                description="Ask questions from your PDF or knowledge base",
+                examples=[
+                    "What is AI?",
+                    "Summarize this document",
+                    "What are key insights?"
+                ],
+            )
+
+# -------------------------------
+# LAUNCH
+# -------------------------------
+if __name__ == "__main__":
+    demo.launch()

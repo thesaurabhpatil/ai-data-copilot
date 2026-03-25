@@ -1,16 +1,23 @@
 def generate_response(query, db, llm):
     try:
-        docs = db.similarity_search(query, k=2)
+        docs = db.similarity_search(query, k=3)
 
-        context = " ".join([doc.page_content[:200] for doc in docs])
+        context = "\n\n".join([doc.page_content for doc in docs])
 
         prompt = f"""
-        Context: {context}
+You are a helpful AI assistant.
 
-        Question: {query}
+Use ONLY the context below to answer.
+If answer is not in context, say "I don't know".
 
-        Give a short and clear answer:
-        """
+Context:
+{context}
+
+Question:
+{query}
+
+Answer in 2-3 sentences:
+"""
 
         response = llm.invoke(prompt)
 
@@ -19,11 +26,16 @@ def generate_response(query, db, llm):
         else:
             response = str(response)
 
-# 🔥 CLEAN OUTPUT
-            response = response.replace(prompt, "").strip()
-    
-            return response
-    
+        # 🔥 Clean output
+        response = response.replace(prompt, "").strip()
+
+        # 🔥 Add sources
+        sources = "\n\nSources:\n"
+        for i, doc in enumerate(docs):
+            sources += f"{i+1}. {doc.page_content[:100]}...\n"
+
+        return response + sources
+
     except Exception as e:
-            import traceback
-            return f"❌ LLM Error:\n{traceback.format_exc()}"
+        import traceback
+        return f"❌ Error:\n{traceback.format_exc()}"
