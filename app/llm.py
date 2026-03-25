@@ -1,9 +1,11 @@
-from langchain_huggingface import HuggingFaceEndpoint
+from langchain_community.llms import HuggingFacePipeline
+from transformers import pipeline
 
 def load_llm():
-    return HuggingFaceEndpoint(
-        repo_id="google/flan-t5-small",  
-        task="text2text-generation",     
-        temperature=0.5,
+    pipe = pipeline(
+        "text2text-generation",
+        model="google/flan-t5-small",   # ✅ lightweight & works
         max_new_tokens=512,
     )
+
+    return HuggingFacePipeline(pipeline=pipe)

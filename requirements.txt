@@ -8,3 +8,5 @@ sentence-transformers
 faiss-cpu>=1.13.0
 pypdf
 huggingface_hub
+transformers
+torch
