@@ -24,6 +24,6 @@ def generate_response(query, db, llm):
     
             return response
     
-        #except Exception as e:
-        #    import traceback
-        #    return f"❌ LLM Error:\n{traceback.format_exc()}"
+    except Exception as e:
+            import traceback
+            return f"❌ LLM Error:\n{traceback.format_exc()}"
