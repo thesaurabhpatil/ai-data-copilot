@@ -40,7 +40,8 @@ def chat_fn(message, history):
         return response
 
     except Exception as e:
-        return f"❌ Chat Error: {str(e)}"
+        import traceback
+        return f"❌ Chat Error:\n{traceback.format_exc()}"
     
 # ---------------- PDF UPLOAD ---------------- #
 def upload_pdf(file):

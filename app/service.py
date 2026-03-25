@@ -18,7 +18,7 @@ def generate_response(query, db, llm):
 
         response = llm.invoke(prompt)
 
-        # 🔥 HANDLE ALL CASES
+        # Handle response types
         if isinstance(response, str):
             return response
 
@@ -28,4 +28,5 @@ def generate_response(query, db, llm):
         return str(response)
 
     except Exception as e:
-        return f"❌ LLM Error: {str(e)}"
+        import traceback
+        return f"❌ LLM Error:\n{traceback.format_exc()}"
