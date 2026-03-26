@@ -29,14 +29,17 @@ def upload_pdf(file):
         return "✅ PDF processed successfully!"
 
     except Exception as e:
-        return f"❌ Error processing PDF: {str(e)}"
+        return f"❌ Error: {str(e)}"
 
 
 # -------------------------------
-# CHAT FUNCTION (RAG)
+# CHAT FUNCTION (FAST + CLEAN)
 # -------------------------------
 def chat_fn(message, history):
     global pdf_db, default_db
+
+    if not message:
+        return history, ""
 
     try:
         active_db = pdf_db if pdf_db else default_db
@@ -44,52 +47,63 @@ def chat_fn(message, history):
         response = generate_response(message, active_db, llm)
 
         if not response or response.strip() == "":
-            return "⚠️ No response generated"
+            response = "⚠️ No response generated"
 
-        return response
+        history = history + [[message, response]]
+
+        return history, ""
 
     except Exception as e:
         import traceback
-        return f"❌ Error:\n{traceback.format_exc()}"
+        history = history + [[message, f"❌ Error:\n{traceback.format_exc()}"]]
+        return history, ""
 
 
 # -------------------------------
-# UI
+# UI (CHATGPT STYLE)
 # -------------------------------
 with gr.Blocks(theme=gr.themes.Soft()) as demo:
 
     gr.Markdown("# ⚡ AI Data Copilot")
-    gr.Markdown("Chat with your data using RAG (PDF + AI)")
+    gr.Markdown("🚀 Chat with your documents using AI (RAG powered)")
 
     with gr.Row():
 
-        # LEFT PANEL (PDF Upload)
+        # LEFT PANEL
         with gr.Column(scale=1):
-            gr.Markdown("### 📄 Upload Document")
+            gr.Markdown("### 📄 Upload PDF")
 
             pdf_input = gr.File(label="Upload PDF")
             upload_btn = gr.Button("Process PDF", variant="primary")
             status = gr.Textbox(label="Status", interactive=False)
 
-            upload_btn.click(
-                upload_pdf,
-                inputs=pdf_input,
-                outputs=status
-            )
+            upload_btn.click(upload_pdf, inputs=pdf_input, outputs=status)
 
         # RIGHT PANEL (CHAT)
         with gr.Column(scale=3):
 
-            chat_ui = gr.ChatInterface(
-                fn=chat_fn,
-                title="💬 Chat with your data",
-                description="Ask questions from your PDF or knowledge base",
-                examples=[
-                    "What is AI?",
-                    "Summarize this document",
-                    "What are key insights?"
-                ],
+            chatbot = gr.Chatbot(height=500)
+
+            msg = gr.Textbox(
+                placeholder="Ask something...",
+                show_label=False
             )
+
+            clear = gr.Button("Clear Chat")
+
+            msg.submit(
+                chat_fn,
+                inputs=[msg, chatbot],
+                outputs=[chatbot, msg]
+            )
+
+            clear.click(
+                lambda: [],
+                None,
+                chatbot,
+                queue=False
+            )
+
 
 # -------------------------------
 # LAUNCH
