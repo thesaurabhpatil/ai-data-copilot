@@ -9,4 +9,4 @@ def load_llm():
         temperature=0.3,
     )
 
-    return HuggingFacePipeline(pipeline=pipe)
+    return HuggingFacePipeline(pipeline=pipe)   
